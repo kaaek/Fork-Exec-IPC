@@ -24,7 +24,7 @@ bool areArgumentsCorrect(int numberOfArguments, char* argumentVector[]);
 long long readDirectory(char *directoryPath);
 long long processGroups(FileArray *groupOne, FileArray *groupTwo, FileArray *groupThree);
 long long getGlobalStatistics(char groupOneFile[], char groupTwoFile[], char groupThreeFile[]);
-void getGroupStatistics(FileArray *group, char outputFilename[]);
+off_t getGroupStatistics(FileArray *group, char outputFilename[]);
 void createNewEmptyFile(char fileName[]);
 void appendToFile(char fileName[], off_t fileSizeToWrite);
 
@@ -34,7 +34,7 @@ int main(int numberOfArguments, char* argumentVector[])
     
     char* directoryPath = argumentVector[1];
 
-    fprintf(stdout, readDirectory(directoryPath));
+    fprintf(stdout, "%lld", readDirectory(directoryPath));
 
     return 0;
 }
@@ -51,7 +51,7 @@ void addFile(FileArray *array, const char *filename) {
         
         char **newFiles = realloc(array->files, newCapacity * sizeof(char*));
         if (newFiles == NULL) {
-            fprintf(stderr, "Failed to reallocate memory for FileArray");
+            fprintf(stderr, "Failed to reallocate memory for FileArray\n");
             exit(EXIT_FAILURE);
         }
         
@@ -61,7 +61,7 @@ void addFile(FileArray *array, const char *filename) {
     
     array->files[array->size] = malloc(strlen(filename) + 1);
     if (array->files[array->size] == NULL) {
-        fprintf(stderr, "Failder to reallocate memory for %s", filename);
+        fprintf(stderr, "Failed to reallocate memory for %s\n", filename);
         exit(EXIT_FAILURE);
     }
     strcpy(array->files[array->size], filename);
@@ -96,14 +96,16 @@ bool areArgumentsCorrect(int numberOfArguments, char* argumentVector[]){
 }
 
 long long readDirectory(char *directoryPath){
-    fprintf(stdout, "Processing directory: %s\n\n", directoryPath);
+    
+    pid_t currentPID = getpid();
+    printf("Parent Process (PID: %d): Analyzing directory %s\n\n", currentPID, directoryPath);
 
     DIR *directoryPointer;
     struct dirent *directoryStream;
     directoryPointer = opendir(directoryPath);
 
     if (directoryPointer == NULL) {
-        fprintf(stderr, "Cannot open the file\n");
+        fprintf(stderr, "Cannot open the directory\n");
         exit(EXIT_FAILURE);
     }
 
@@ -112,11 +114,12 @@ long long readDirectory(char *directoryPath){
     FileArray groupThree; initializeFileArray(&groupThree);
 
     int roundRobinCounter = 1; // Indicates in which group the file/dir will go during each read operation
+    int fileCount = 0;
 
     while ((directoryStream = readdir(directoryPointer)) != NULL){
         if(directoryStream->d_type == DT_REG){ // Is the entry's data type (d_type) a regular file (DT_REG)?
             
-            printf("FILE: %s\n", directoryStream->d_name);
+            // printf("FILE: %s\n", directoryStream->d_name);
 
             char fullPath[PATH_MAX]; // Cap the size of the file path to prevent a buffer overflow (limits.h)
             snprintf(fullPath, sizeof(fullPath), "%s/%s", directoryPath, directoryStream->d_name); // Takes directoryPath (input) and the file name (read from directoryStream) to produce: /path/to/file
@@ -132,10 +135,17 @@ long long readDirectory(char *directoryPath){
                     addFile(&groupThree, fullPath);
                 break;
             }
+            fileCount++;
             roundRobinCounter++;
             if (roundRobinCounter > 3) roundRobinCounter = 1; // Reset round robin counter
         }
     }
+
+    printf("Total files found: %d\n", fileCount);
+    printf("Dividing files into 3 groups...\n");
+    printf("Group 1: %d files\n", groupOne.size);
+    printf("Group 2: %d files\n", groupTwo.size);
+    printf("Group 3: %d files\n", groupThree.size);
 
     if(closedir(directoryPointer) == -1) {
         fprintf(stderr, "Cannot close the directory\n");
@@ -149,6 +159,7 @@ long long readDirectory(char *directoryPath){
 long long processGroups(FileArray *groupOne, FileArray *groupTwo, FileArray *groupThree){
 
     long long cumulativeSize = -1;
+    off_t groupOneSize = -1, groupTwoSize =-1, groupThreeSize = -1;
 
     char groupOneFile[] = "group1.txt";
     char groupTwoFile[] = "group2.txt";
@@ -160,10 +171,10 @@ long long processGroups(FileArray *groupOne, FileArray *groupTwo, FileArray *gro
         exit(EXIT_FAILURE);
 
     } else if (pid1 == 0){ // Child 1 executes this block
-
-        getGroupStatistics(groupOne, groupOneFile);
+        printf("[Child 1, PID: %d] Processing group 1...\n", getpid());
+        groupOneSize = getGroupStatistics(groupOne, groupOneFile);
+        printf("[Child 1, PID: %d] Total size: %d bytes. Written to %s\n", getpid(), (int) groupOneSize, groupOneFile);
         exit(EXIT_SUCCESS);
-
     } else {
 
         pid_t pid2 = fork();
@@ -172,10 +183,10 @@ long long processGroups(FileArray *groupOne, FileArray *groupTwo, FileArray *gro
             exit(EXIT_FAILURE);
 
         } else if (pid2 == 0) { // Child 2 executes this block
-            
-            getGroupStatistics(groupTwo, groupTwoFile);
+            printf("[Child 2, PID: %d] Processing group 2...\n", getpid());
+            groupTwoSize = getGroupStatistics(groupTwo, groupTwoFile);
+            printf("[Child 2, PID: %d] Total size: %ld bytes. Written to %s\n", getpid(), groupTwoSize, groupTwoFile);
             exit(EXIT_SUCCESS);
-
         } else {
             
             pid_t pid3 = fork();
@@ -184,17 +195,59 @@ long long processGroups(FileArray *groupOne, FileArray *groupTwo, FileArray *gro
                 exit(EXIT_FAILURE);
 
             } else if (pid3 == 0) { // Child 3 executes this block
-                
-                getGroupStatistics(groupThree, groupThreeFile);
+                printf("[Child 3, PID: %d] Processing group 3...\n", getpid());
+                groupThreeSize = getGroupStatistics(groupThree, groupThreeFile);
+                printf("[Child 3, PID: %d] Total size: %ld bytes. Written to %s\n", getpid(), groupThreeSize, groupThreeFile);
                 exit(EXIT_SUCCESS);
-
             } else { // Parent finally executes this block
                 
                 waitpid(pid1, NULL, 0);
                 waitpid(pid2, NULL, 0);
-                waitpid(pid3, NULL, 0);
+                waitpid(pid3, NULL, 0);           
+
+                printf("[Parent] All children completed. Reading results...\n");
 
                 cumulativeSize = getGlobalStatistics(groupOneFile, groupTwoFile, groupThreeFile);
+
+                FILE *groupOneFilePointer = fopen(groupOneFile, "r");
+                FILE *groupTwoFilePointer = fopen(groupTwoFile, "r");
+                FILE *groupThreeFilePointer = fopen(groupThreeFile, "r");
+
+                fscanf(groupOneFilePointer, "%ld", &groupOneSize);
+                fscanf(groupTwoFilePointer, "%ld", &groupTwoSize);
+                fscanf(groupThreeFilePointer, "%ld", &groupThreeSize);
+
+                fclose(groupOneFilePointer);
+                fclose(groupTwoFilePointer);
+                fclose(groupThreeFilePointer);
+                
+                double groupOneSizeMegabytes    = (double)groupOneSize / (1024.0 * 1024.0);
+                double groupTwoSizeMegabytes    = (double)groupTwoSize / (1024.0 * 1024.0);
+                double groupThreeSizeMegabytes  = (double)groupThreeSize / (1024.0 * 1024.0);
+                double cumulativeSizeMegabytes = (double)cumulativeSize / (1024.0 * 1024.0);
+
+                printf("---- ANALYSIS REPORT ----\n");
+                printf("Group 1: %ld bytes (%f MB)\n", groupOneSize, groupOneSizeMegabytes);
+                printf("Group 2: %ld bytes (%f MB)\n", groupTwoSize, groupTwoSizeMegabytes);
+                printf("Group 3: %ld bytes (%f MB)\n", groupThreeSize, groupThreeSizeMegabytes);
+                printf("-----------------------------------------\n");
+                printf("Total Size: %lld bytes (%f MB)\n", cumulativeSize, cumulativeSizeMegabytes);
+
+                double largestGroupSize = groupOneSizeMegabytes;
+                int largestGroupNumber = 1;
+
+                if (groupTwoSizeMegabytes > largestGroupSize) {
+                    largestGroupSize = groupTwoSizeMegabytes;
+                    largestGroupNumber = 2;
+                }
+
+                if (groupThreeSizeMegabytes > largestGroupSize) {
+                    largestGroupSize = groupThreeSizeMegabytes;
+                    largestGroupNumber = 3;
+                }
+
+                printf("Largest Group: Group %d (%f MB)\n", largestGroupNumber, largestGroupSize);
+                printf("[Parent] Analysis completed successfully.\n");
 
                 freeFileArray(groupOne);
                 freeFileArray(groupTwo);
@@ -256,7 +309,7 @@ long long getGlobalStatistics(char groupOneFile[], char groupTwoFile[], char gro
     return cumulativeSize;
 }
 
-void getGroupStatistics(FileArray *group, char outputFilename[]){
+off_t getGroupStatistics(FileArray *group, char outputFilename[]){
 
     createNewEmptyFile(outputFilename); // To save the cumulative size of the group of files
 
@@ -276,6 +329,8 @@ void getGroupStatistics(FileArray *group, char outputFilename[]){
     }
     
     appendToFile(outputFilename, totalSize);
+
+    return totalSize;
 }
 
 void createNewEmptyFile(char fileName[]){
