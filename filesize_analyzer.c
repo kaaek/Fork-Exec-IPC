@@ -28,8 +28,8 @@ off_t getGroupStatistics(FileArray *group, char outputFilename[]);
 void createNewEmptyFile(char fileName[]);
 void appendToFile(char fileName[], off_t fileSizeToWrite);
 
-int main(int numberOfArguments, char* argumentVector[])
-{    
+int main(int numberOfArguments, char* argumentVector[]) {    
+
     if(!areArgumentsCorrect(numberOfArguments, argumentVector)) exit(EXIT_FAILURE);
     
     char* directoryPath = argumentVector[1];
