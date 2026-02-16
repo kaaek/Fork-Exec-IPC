@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+
 typedef struct {       // Dynamically-allocated array to hold the directory contents.
     char **files;      // Array of file path strings
     int size;          // Number of files currently stored
