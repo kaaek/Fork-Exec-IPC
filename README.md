@@ -15,7 +15,7 @@ Analyzes total file sizes in a directory using parallel processing.
 - The parent process waits for all children to complete, then reads the results from the output files.
 - Aggregates the group totals to produce final statistics including total size and identification of the largest group
 
-![[Pasted image 20260217202410.png]]
+[Alt text](Pasted image 20260217202410.png)
 
 ---
 
@@ -33,8 +33,8 @@ Searches for a keyword across multiple text files in parallel.
 - Parent reads occurrence counts from all pipes, then waits for all children to collect exit statuses
 - Displays results showing which files contain the keyword and total occurrences
 
-![[Pasted image 20260217203007.png]]
-![[Pasted image 20260217203026.png]]
+[Alt text](Pasted image 20260217203007.png)
+[Alt text](Pasted image 20260217203026.png)
 
 ---
 
@@ -52,8 +52,8 @@ Performs arithmetic operations using parent-child process delegation.
 - Parent validates the child's exit status before displaying the result to the user
 - Process repeats in a loop until user selects exit option
 
-![[Pasted image 20260217203238.png]]
-![[Pasted image 20260217203304.png]]
+[Alt text](Pasted image 20260217203238.png)
+[Alt text](Pasted image 20260217203304.png)
 
 ---
 
@@ -74,7 +74,7 @@ Applies multiple string transformations concurrently using separate processes.
 - Parent waits for all five children to complete execution
 - After all children finish, parent reads all output files and displays a formatted results summary
 
-![[Pasted image 20260217204029.png]]
+[Alt text](Pasted image 20260217204029.png)
 
 ---
 
@@ -93,4 +93,4 @@ Solves a maze using parallel depth-first search exploration.
 - Parent processes wait for their children to complete before returning
 - This creates a tree of processes exploring all possible paths simultaneously
 
-![[Pasted image 20260217204116.png]]
+[Alt text](Pasted image 20260217204116.png)
