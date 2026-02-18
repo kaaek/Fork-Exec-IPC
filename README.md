@@ -1,4 +1,4 @@
-This directory contains five C programs demonstrating process management and inter-process communication (IPC) concepts.
+<img width="998" height="904" alt="Pasted image 20260217204029" src="https://github.com/user-attachments/assets/b825c5a1-ea5f-40d2-a57f-bafc5eeb7c80" />This directory contains five C programs demonstrating process management and inter-process communication (IPC) concepts.
 
 ---
 
@@ -15,7 +15,7 @@ Analyzes total file sizes in a directory using parallel processing.
 - The parent process waits for all children to complete, then reads the results from the output files.
 - Aggregates the group totals to produce final statistics including total size and identification of the largest group
 
-[Alt text](Pasted image 20260217202410.png)
+<img width="1147" height="531" alt="Pasted image 20260217202410" src="https://github.com/user-attachments/assets/aa201c10-ef92-46b2-91f0-0551721af348" />
 
 ---
 
@@ -33,8 +33,8 @@ Searches for a keyword across multiple text files in parallel.
 - Parent reads occurrence counts from all pipes, then waits for all children to collect exit statuses
 - Displays results showing which files contain the keyword and total occurrences
 
-[Alt text](Pasted image 20260217203007.png)
-[Alt text](Pasted image 20260217203026.png)
+<img width="765" height="664" alt="Pasted image 20260217203007" src="https://github.com/user-attachments/assets/c86ca50a-8a04-454c-a782-8ec0451421df" />
+<img width="764" height="153" alt="Pasted image 20260217203026" src="https://github.com/user-attachments/assets/21847e2d-9c65-47ac-a6af-6bd73c5d4992" />
 
 ---
 
@@ -52,8 +52,8 @@ Performs arithmetic operations using parent-child process delegation.
 - Parent validates the child's exit status before displaying the result to the user
 - Process repeats in a loop until user selects exit option
 
-[Alt text](Pasted image 20260217203238.png)
-[Alt text](Pasted image 20260217203304.png)
+<img width="1117" height="912" alt="Pasted image 20260217203238" src="https://github.com/user-attachments/assets/35a6a739-95fa-4458-af16-e80b08b9706e" />
+<img width="961" height="973" alt="Pasted image 20260217203304" src="https://github.com/user-attachments/assets/34d94e6b-b314-4951-a503-763d2987e8bc" />
 
 ---
 
@@ -74,7 +74,7 @@ Applies multiple string transformations concurrently using separate processes.
 - Parent waits for all five children to complete execution
 - After all children finish, parent reads all output files and displays a formatted results summary
 
-[Alt text](Pasted image 20260217204029.png)
+<img width="998" height="904" alt="Pasted image 20260217204029" src="https://github.com/user-attachments/assets/21275d9b-29b2-4ce7-b497-b505072b7d44" />
 
 ---
 
@@ -93,4 +93,4 @@ Solves a maze using parallel depth-first search exploration.
 - Parent processes wait for their children to complete before returning
 - This creates a tree of processes exploring all possible paths simultaneously
 
-[Alt text](Pasted image 20260217204116.png)
+<img width="1077" height="999" alt="Pasted image 20260217204116" src="https://github.com/user-attachments/assets/da7731bd-1322-4114-8997-5b014f40c036" />
