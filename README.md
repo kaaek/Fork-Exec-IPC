@@ -1,7 +1,3 @@
-<img width="998" height="904" alt="Pasted image 20260217204029" src="https://github.com/user-attachments/assets/b825c5a1-ea5f-40d2-a57f-bafc5eeb7c80" />This directory contains five C programs demonstrating process management and inter-process communication (IPC) concepts.
-
----
-
 ## Exercise 1: `filesize_analyzer.c`
 
 Analyzes total file sizes in a directory using parallel processing.
